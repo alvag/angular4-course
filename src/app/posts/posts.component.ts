@@ -17,55 +17,43 @@ export class PostsComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.service.getPosts()
-            .subscribe(response => {
-                this.posts = response.json();
-            }, error => {
-                alert("Error inesperado");
-                console.log(error);
-            });
+        this.service.getAll()
+            .subscribe(response => this.posts = response);
     }
 
     createPost(input: HTMLInputElement) {
         let post: any = { title: input.value };
         input.value = "";
-        this.service.createPost(post)
+        this.service.create(post)
             .subscribe(response => {
-                post.id = response.json().id;
+                post.id = response.id;
                 this.posts.splice(0, 0, post);
 
             }, (error: AppError) => {
                 if (error instanceof BadInput) {
                     // this.form.setErrors(error.originalError);
                 } else {
-                    alert("Error inesperado");
-                    console.log(error);
+                    throw error;
                 }
             });
     }
 
     updatePost(post) {
-        this.service.updatePost(post)
-            .subscribe(response => {
-                console.log(response.json());
-            }, error => {
-                alert("Error inesperado");
-                console.log(error);
-            });
+        this.service.update(post)
+            .subscribe(response => console.log(response));
     }
 
     deletePost(post) {
-        this.service.deletePost(post.id)
-            .subscribe(response => {
+        this.service.delete(post.id)
+            .subscribe(() => {
                 let index = this.posts.indexOf(post);
                 this.posts.splice(index, 1);
             }, (error: AppError) => {
                 if (error instanceof NotFoundError) {
-                    alert("El psot ya fue borrado");
+                    alert("El post ya fue borrado");
                 } else {
-                    alert("Error inesperado");
+                    throw error;
                 }
-                console.log(error);
             });
     }
 
