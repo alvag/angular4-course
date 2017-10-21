@@ -21,7 +21,29 @@ export class PostsComponent implements OnInit {
             .subscribe(response => this.posts = response);
     }
 
+    // optimistic update
     createPost(input: HTMLInputElement) {
+        let post: any = { title: input.value };
+        this.posts.splice(0, 0, post);
+
+        input.value = "";
+
+        this.service.create(post)
+            .subscribe(response => {
+                post.id = response.id;
+            }, (error: AppError) => {
+                this.posts.splice(0, 1);
+
+                if (error instanceof BadInput) {
+                    // this.form.setErrors(error.originalError);
+                } else {
+                    throw error;
+                }
+            });
+    }
+
+    // pessimistic update
+    /*createPost(input: HTMLInputElement) {
         let post: any = { title: input.value };
         input.value = "";
         this.service.create(post)
@@ -36,7 +58,7 @@ export class PostsComponent implements OnInit {
                     throw error;
                 }
             });
-    }
+    }*/
 
     updatePost(post) {
         this.service.update(post)
@@ -44,17 +66,20 @@ export class PostsComponent implements OnInit {
     }
 
     deletePost(post) {
+        let index = this.posts.indexOf(post);
+        this.posts.splice(index, 1);
+
         this.service.delete(post.id)
-            .subscribe(() => {
-                let index = this.posts.indexOf(post);
-                this.posts.splice(index, 1);
-            }, (error: AppError) => {
-                if (error instanceof NotFoundError) {
-                    alert("El post ya fue borrado");
-                } else {
-                    throw error;
-                }
-            });
+            .subscribe(
+                null,
+                (error: AppError) => {
+                    this.posts.splice(index, 0, post);
+                    if (error instanceof NotFoundError) {
+                        alert("El post ya fue borrado");
+                    } else {
+                        throw error;
+                    }
+                });
     }
 
 }

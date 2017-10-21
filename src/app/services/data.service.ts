@@ -20,6 +20,7 @@ export class DataService {
     }
 
     create(data) {
+        // return Observable.throw(new AppError()); // simula una respuesta de error
         return this.http.post(this.url, JSON.stringify(data))
             .map(response => response.json())
             .catch(this.handleError);
@@ -32,6 +33,7 @@ export class DataService {
     }
 
     delete(id) {
+        // return Observable.throw(new AppError()); // simula una respuesta de error
         return this.http.delete(this.url + "/" + id)
             .map(response => response.json())
             .catch(this.handleError);
